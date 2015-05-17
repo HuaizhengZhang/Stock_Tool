@@ -112,7 +112,7 @@ def _fun_except(x):
     else:
         return x
 
-#网络连接，获取数据
+#网络连接，获取复权数据
 def _parse_fq_data(url, retry_count, pause):
     for _ in range(retry_count):
         time.sleep(pause)
@@ -133,7 +133,7 @@ def _parse_fq_data(url, retry_count, pause):
             pass
         else:
             return df
-    raise IOError("获取失败，请检查网络")
+    raise IOError("复权获取失败，请检查网络")
 
 #获取复权股票日K线数据
 def get_fq_day_data(code, retry_count=3, autype='qfq', index=False, pause=0.001):
@@ -274,3 +274,44 @@ def _random(n=13):
     start = 10**(n-1)
     end = (10**n)-1
     return str(randint(start, end))
+
+def get_sharebonus_1_data(code, retry_count=3, pause=0.001):
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            url = bs.SHAREBONUS_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'], code)
+            html = lxml.html.parse(url)  
+            res = html.xpath('//table[@id=\"sharebonus_1\"]')
+            sarr = [etree.tostring(node) for node in res]
+            sarr = ''.join(sarr)
+            df = pd.read_html(sarr)[0]
+            df.columns = bs.SHAREBONUS_1_COLS
+            del df['del1']
+            del df['del2']
+            df = df.set_index('公告日期')
+        except _network_error_classes:
+            pass
+        else:
+            return df
+    raise IOError("分红获取失败，请检查网络")
+
+
+def get_sharebonus_2_data(code, retry_count=3, pause=0.001):
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            url = bs.SHAREBONUS_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'], code)
+            html = lxml.html.parse(url)  
+            res = html.xpath('//table[@id=\"sharebonus_2\"]')
+            sarr = [etree.tostring(node) for node in res]
+            sarr = ''.join(sarr)
+            df = pd.read_html(sarr)[0]
+            df.columns = bs.SHAREBONUS_2_COLS
+            del df['del']
+            df = df.set_index('公告日期')
+        except _network_error_classes:
+            pass
+        else:
+            return df
+    raise IOError("配股获取失败，请检查网络")
+

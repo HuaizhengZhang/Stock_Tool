@@ -25,16 +25,9 @@ P_TYPE = {'http': 'http://'}
 DOMAINS = {'sina': 'sina.com.cn', 'sinahq': 'sinajs.cn',
            'ifeng': 'ifeng.com', 'sf': 'finance.sina.com.cn',
            'vsf': 'vip.stock.finance.sina.com.cn', 
+           'afi': 'app.finance.ifeng.com',
            'idx':'www.csindex.com.cn', '163':'money.163.com',
            'em':'eastmoney.com'}
-PAGES = {'fd': 'index.phtml', 'dl': 'downxls.php', 'jv': 'json_v2.php',
-         'cpt': 'newFLJK.php', 'ids': 'newSinaHy.php', 'lnews':'rollnews_ch_out_interface.php',
-         'ntinfo':'vCB_BulletinGather.php', 'hs300b':'000300cons.xls',
-         'hs300w':'000300closeweight.xls','sz50b':'000016cons.xls',
-         'dp':'all_fpya.php', '163dp':'fpyg.html',
-         'emxsg':'JS.aspx', '163fh':'jjcgph.php',
-         'newstock':'vRPD_NewStockIssue.php', 'zz500b':'000905cons.xls',
-         't_ticks':'vMS_tradedetail.php'}
 
 HIST_FQ_FACTOR_URL = '%s%s/api/json.php/BasicStockSrv.getStockFuQuanData?symbol=%s&type=qfq'
 HIST_FQ_COLS = ['date', 'open', 'high', 'close', 'low', 'volumn', 'amount', 'factor']
@@ -47,6 +40,15 @@ LIVE_DATA_COLS = ['name', 'open', 'pre_close', 'price', 'high', 'low', 'bid', 'a
                   'b1_v', 'b1_p', 'b2_v', 'b2_p', 'b3_v', 'b3_p', 'b4_v', 'b4_p', 'b5_v', 'b5_p',
                   'a1_v', 'a1_p', 'a2_v', 'a2_p', 'a3_v', 'a3_p', 'a4_v', 'a4_p', 'a5_v', 'a5_p', 'date', 'time', 's']
 
+SHAREBONUS_URL = '%s%s/corp/go.php/vISSUE_ShareBonus/stockid/%s.phtml'
+SHAREBONUS_1_COLS = ['公告日期',	'送股(股)', '转增(股)', '派息(税前)(元)', '进度', '除权除息日', '股权登记日',
+					 '红股上市日', '查看详细', 'del1', 'del2']
+
+SHAREBONUS_2_COLS = ['公告日期', '配股方案(每10股配股股数)', '配股价格(元)', '基准股本(万股)', '除权日', 
+					 '股权登记日', '缴款起始日', '缴款终止日', '配股上市日', '募集资金合计(元)','查看详细','del']
+
+ALL_STOCK_LIST = '%s%s/list/stock.php?t=%sa&f=symbol&o=asc&p=%s'
+
 import sys
 PY3 = (sys.version_info[0] >= 3)
 def _write_head():
@@ -54,5 +56,5 @@ def _write_head():
     sys.stdout.flush()
 
 def _write_console():
-    sys.stdout.write("#")
+    sys.stdout.write("&")
     sys.stdout.flush()
