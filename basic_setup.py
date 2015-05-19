@@ -25,9 +25,7 @@ P_TYPE = {'http': 'http://'}
 DOMAINS = {'sina': 'sina.com.cn', 'sinahq': 'sinajs.cn',
            'ifeng': 'ifeng.com', 'sf': 'finance.sina.com.cn',
            'vsf': 'vip.stock.finance.sina.com.cn', 
-           'afi': 'app.finance.ifeng.com',
-           'idx':'www.csindex.com.cn', '163':'money.163.com',
-           'em':'eastmoney.com'}
+           'afi': 'app.finance.ifeng.com'}
 
 HIST_FQ_FACTOR_URL = '%s%s/api/json.php/BasicStockSrv.getStockFuQuanData?symbol=%s&type=qfq'
 HIST_FQ_COLS = ['date', 'open', 'high', 'close', 'low', 'volumn', 'amount', 'factor']
@@ -47,7 +45,9 @@ SHAREBONUS_1_COLS = ['公告日期',	'送股(股)', '转增(股)', '派息(税�
 SHAREBONUS_2_COLS = ['公告日期', '配股方案(每10股配股股数)', '配股价格(元)', '基准股本(万股)', '除权日', 
 					 '股权登记日', '缴款起始日', '缴款终止日', '配股上市日', '募集资金合计(元)','查看详细','del']
 
-ALL_STOCK_LIST = '%s%s/list/stock.php?t=%sa&f=symbol&o=asc&p=%s'
+ALL_STOCK_LIST = '%s%s/hq/list.php?type=stock_a&class=%s'
+
+STOCK_STRUCTURE_URL = '%s%s/corp/go.php/vCI_StockStructure/stockid/%s.phtml'
 
 import sys
 PY3 = (sys.version_info[0] >= 3)

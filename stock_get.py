@@ -205,49 +205,13 @@ def get_fq_day_data(code, retry_count=3, autype='qfq', index=False, pause=0.001)
 
 #获取实时交易数据
 def get_realtime_quotes(symbols=None):
-    """
-        获取实时交易数据 getting real time quotes data
-       用于跟踪交易情况（本次执行的结果-上一次执行的数据）
-    Parameters
-    ------
-        symbols : string, array-like object (list, tuple, Series).
-        
-    return
-    -------
-        DataFrame 实时交易数据
-              属性:0：name，股票名字
-            1：open，今日开盘价
-            2：pre_close，昨日收盘价
-            3：price，当前价格
-            4：high，今日最高价
-            5：low，今日最低价
-            6：bid，竞买价，即“买一”报价
-            7：ask，竞卖价，即“卖一”报价
-            8：volumn，成交量 maybe you need do volumn/100
-            9：amount，成交金额（元 CNY）
-            10：b1_v，委买一（笔数 bid volume）
-            11：b1_p，委买一（价格 bid price）
-            12：b2_v，“买二”
-            13：b2_p，“买二”
-            14：b3_v，“买三”
-            15：b3_p，“买三”
-            16：b4_v，“买四”
-            17：b4_p，“买四”
-            18：b5_v，“买五”
-            19：b5_p，“买五”
-            20：a1_v，委卖一（笔数 ask volume）
-            21：a1_p，委卖一（价格 ask price）
-            ...
-            30：date，日期；
-            31：time，时间；
-    """
     symbols_list = ''
     if type(symbols) is list or type(symbols) is set or type(symbols) is tuple or type(symbols) is pd.Series:
         for code in symbols:
             symbols_list += _code_to_symbol(code) + ','
     else:
         symbols_list = _code_to_symbol(symbols)
-        
+    bs._write_head()    
     symbols_list = symbols_list[:-1] if len(symbols_list) > 8 else symbols_list 
     request = Request(bs.LIVE_DATA_URL%(bs.P_TYPE['http'], bs.DOMAINS['sinahq'],
                                                 _random(), symbols_list))
@@ -267,6 +231,7 @@ def get_realtime_quotes(symbols=None):
     ls = [cls for cls in df.columns if '_v' in cls]
     for txt in ls:
         df[txt] = df[txt].map(lambda x : x[:-2])
+    df = df.set_index('name')
     return df
 
 def _random(n=13):
@@ -314,4 +279,62 @@ def get_sharebonus_2_data(code, retry_count=3, pause=0.001):
         else:
             return df
     raise IOError("配股获取失败，请检查网络")
+
+def get_all_stock_list():
+    stock_name = []
+    stock_code = []
+    bs._write_head()
+    #获取深A股票
+    url = bs.ALL_STOCK_LIST%(bs.P_TYPE['http'], bs.DOMAINS['afi'], 'sa')
+    html = lxml.html.parse(url)
+    res = html.xpath('//div[@class=\"result\"]/ul')
+    nodes=res[0].xpath("li/a")
+    for n in nodes:
+        text = n.text
+        stock_name.append(text[0:-8].encode('utf-8'))
+        stock_code.append(text[-7:-1])
+    
+    #获取创业板股票
+    url = bs.ALL_STOCK_LIST%(bs.P_TYPE['http'], bs.DOMAINS['afi'], 'gem')
+    html = lxml.html.parse(url)
+    res = html.xpath('//div[@class=\"result\"]/ul')
+    nodes=res[0].xpath("li/a")
+    for n in nodes:
+        text = n.text
+        stock_name.append(text[0:-8].encode('utf-8'))
+        stock_code.append(text[-7:-1])
+
+    #获取沪A股票
+    url = bs.ALL_STOCK_LIST%(bs.P_TYPE['http'], bs.DOMAINS['afi'], 'ha')
+    html = lxml.html.parse(url)
+    res = html.xpath('//div[@class=\"result\"]/ul')
+    nodes=res[0].xpath("li/a")  
+    for n in nodes:
+        text = n.text
+        stock_name.append(text[0:-8].encode('utf-8'))
+        stock_code.append(text[-7:-1])   
+    
+    data = {'name':stock_name,'code':stock_code}
+    df = pd.DataFrame(data)
+    df = df.set_index('code')
+    return df
+    
+def get_stock_structure(code):
+    url = bs.STOCK_STRUCTURE_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'], code)
+    html = lxml.html.parse(url)  
+    res = html.xpath('//table[@id=\"StockStructureNewTable%s\"]')
+    nodes=res[0].xpath("tr/td")  
+    for n in nodes:
+        text = n.text
+        print text
+    
+
+   
+
+
+
+
+
+
+
 
