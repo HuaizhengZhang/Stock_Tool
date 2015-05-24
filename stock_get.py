@@ -320,13 +320,34 @@ def get_all_stock_list():
     return df
     
 def get_stock_structure(code):
+    temp = []
+    temp_index = []
     url = bs.STOCK_STRUCTURE_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'], code)
     html = lxml.html.parse(url)  
-    res = html.xpath('//table[@id=\"StockStructureNewTable%s\"]')
-    nodes=res[0].xpath("tr/td")  
+    res = html.xpath('//table[@id=\"StockStructureNewTable0\"]')
+    nodes=res[0].xpath("tbody/tr/td")  
     for n in nodes:
-        text = n.text
-        print text
+        temp.append(n.text)
+    length = len(temp)
+    for x in xrange(0,length):
+        if length % 6 == 0:
+            if x % 6 == 0:
+                temp_index.append(temp[x])
+        elif length % 5 ==0:
+            if x % 5 == 0:
+                temp_index.append(temp[x])
+        elif length % 4 ==0:
+            if x % 4 == 0:
+                temp_index.append(temp[x])
+        elif length % 3 ==0:
+            if x % 3 == 0:
+                temp_index.append(temp[x])
+        elif length % 2 ==0:
+            if x % 2 == 0:
+                temp_index.append(temp[x])
+     
+    df = pd.DataFrame(temp_index)
+    return df
     
 
    

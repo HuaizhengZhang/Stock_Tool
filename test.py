@@ -21,4 +21,4 @@ Copyright (c) 2015 zhzHNN. All rights reserved.
 
 import stock_get as sg
 
-print(sg.get_stock_structure('002024'))
+print(sg.get_stock_structure('300431'))
