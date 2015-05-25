@@ -230,6 +230,7 @@ def get_realtime_quotes(symbols=None):
     df['code'] = syms
     ls = [cls for cls in df.columns if '_v' in cls]
     for txt in ls:
+        bs._write_console()
         df[txt] = df[txt].map(lambda x : x[:-2])
     df = df.set_index('name')
     return df
@@ -319,43 +320,88 @@ def get_all_stock_list():
     df = df.set_index('code')
     return df
     
-def get_stock_structure(code):
+def get_stock_structure(code, retry_count=3, pause=0.001):
     temp = []
     temp_index = []
+    temp_data1 = []
+    temp_data2 = []
+    temp_data3 = []
+    temp_data4 = []
+    temp_data5 = []
+    i = 0
+    df_total = []
     url = bs.STOCK_STRUCTURE_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'], code)
-    html = lxml.html.parse(url)  
-    res = html.xpath('//table[@id=\"StockStructureNewTable0\"]')
-    nodes=res[0].xpath("tbody/tr/td")  
-    for n in nodes:
-        temp.append(n.text)
-    length = len(temp)
-    for x in xrange(0,length):
-        if length % 6 == 0:
-            if x % 6 == 0:
-                temp_index.append(temp[x])
-        elif length % 5 ==0:
-            if x % 5 == 0:
-                temp_index.append(temp[x])
-        elif length % 4 ==0:
-            if x % 4 == 0:
-                temp_index.append(temp[x])
-        elif length % 3 ==0:
-            if x % 3 == 0:
-                temp_index.append(temp[x])
-        elif length % 2 ==0:
-            if x % 2 == 0:
-                temp_index.append(temp[x])
-     
-    df = pd.DataFrame(temp_index)
-    return df
-    
-
-   
-
-
-
-
-
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            html = lxml.html.parse(url)
+            bs._write_head()  
+            while html.xpath('//table[@id=\"StockStructureNewTable%s\"]'%i):
+                bs._write_console()
+                res = html.xpath('//table[@id=\"StockStructureNewTable%s\"]'%i)
+                nodes=res[0].xpath("tbody/tr/td")  
+                for n in nodes:
+                    temp.append(n.text)
+                length = len(temp)
+                for x in xrange(0,length):
+                    if length % 6 == 0:
+                        if x % 6 == 0:
+                            temp_index.append(temp[x])
+                            temp_data1.append(temp[x+1])
+                            temp_data2.append(temp[x+2])
+                            temp_data3.append(temp[x+3])
+                            temp_data4.append(temp[x+4])
+                            temp_data5.append(temp[x+5])
+                        data = {'index':temp_index,'data1':temp_data1,'data2':temp_data2,'data3':temp_data3,'data4':temp_data4,'data5':temp_data5}
+                        df = pd.DataFrame(data)
+                    elif length % 5 ==0:
+                        if x % 5 == 0:
+                            temp_index.append(temp[x])
+                            temp_data1.append(temp[x+1])
+                            temp_data2.append(temp[x+2])
+                            temp_data3.append(temp[x+3])
+                            temp_data4.append(temp[x+4])
+                        data = {'index':temp_index,'data1':temp_data1,'data2':temp_data2,'data3':temp_data3,'data4':temp_data4}
+                        df = pd.DataFrame(data)
+                    elif length % 4 ==0:
+                        if x % 4 == 0:
+                            temp_index.append(temp[x])
+                            temp_data1.append(temp[x+1])
+                            temp_data2.append(temp[x+2])
+                            temp_data3.append(temp[x+3])
+                        data = {'index':temp_index,'data1':temp_data1,'data2':temp_data2,'data3':temp_data3}
+                        df = pd.DataFrame(data)
+                    elif length % 3 ==0:
+                        if x % 3 == 0:
+                            temp_index.append(temp[x])
+                            temp_data1.append(temp[x+1])
+                            temp_data2.append(temp[x+2])
+                        data = {'index':temp_index,'data1':temp_data1,'data2':temp_data2}
+                        df = pd.DataFrame(data)
+                    elif length % 2 ==0:
+                        if x % 2 == 0:
+                            temp_index.append(temp[x])
+                            temp_data1.append(temp[x+1])
+                        data = {'index':temp_index,'data1':temp_data1}
+                        df = pd.DataFrame(data)
+                if i < 1:
+                    df_total = df
+                else:
+                    df_total = pd.merge(df_total, df, on='index')
+                temp = []
+                temp_index = []
+                temp_data1 = []
+                temp_data2 = []
+                temp_data3 = []
+                temp_data4 = []
+                temp_data5 = []
+                i = i + 1
+        except _network_error_classes:
+            pass
+        else:
+            df_total = df_total.set_index('index')
+            return df_total
+    raise IOError("股本结构获取失败，请检查网络")
 
 
 

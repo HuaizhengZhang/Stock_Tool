@@ -21,4 +21,11 @@ Copyright (c) 2015 zhzHNN. All rights reserved.
 
 import stock_get as sg
 
-print(sg.get_stock_structure('300431'))
+
+#print(sg.get_stock_structure('002024'))
+sg.get_stock_structure('000009').to_csv('000009.csv', header=False,encoding='utf8')
+
+"""if sg.get_stock_structure('300431'):
+	print('TRUE')
+else:
+	print('FALSE')"""

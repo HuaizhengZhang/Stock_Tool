@@ -87,7 +87,20 @@ while i < length:
 		Sharebonus_2_Data.to_csv('Data/'+ dirname + '/' + Filename, mode='a', encoding='utf8')
 	else:
 		Sharebonus_1_Data.to_csv('Data/'+ dirname + '/' + Filename,encoding='utf8')
-		Sharebonus_2_Data.to_csv('Data/'+ dirname + '/' + Filename, mode='a', encoding='utf8')  
+		Sharebonus_2_Data.to_csv('Data/'+ dirname + '/' + Filename, mode='a', encoding='utf8')
+
+#stock_structure
+	try:
+		Stock_Structure = sg.get_stock_structure(StockCode[i])
+	except ValueError, e:
+		print u'股本结构数据出错了，跳过'.encode('utf-8')
+	Filename = dirname + u'股本结构数据(新浪网)'.encode('utf-8') + '.csv'
+	if os.path.exists('Data/'+ dirname + '/' + Filename):
+		os.remove('Data/'+ dirname + '/' + Filename)
+		Stock_Structure.to_csv('Data/'+ dirname + '/' + Filename, header=False, encoding='utf8')
+	else:
+		Stock_Structure.to_csv('Data/'+ dirname + '/' + Filename, header=False, encoding='utf8')
+
 	
 	i = i+1
 
