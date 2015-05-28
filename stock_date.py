@@ -46,7 +46,7 @@ def get_past_year():
     return str(lasty)
 
 
-def get_quarts(start,end):
+def get_quarts(start, end):
     idx = pd.period_range('Q'.join(year_qua(start)), 'Q'.join(year_qua(end)),
                           freq='Q-JAN')
     return [str(d).split('Q') for d in idx]

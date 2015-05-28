@@ -83,6 +83,16 @@ def get_day_data(code=None, ktype='D', retry_count=3, pause=0.001):
     
     raise IOError("%s网络有问题，请重新获取:%s" % (code, url))
 
+#复权日数据链接
+def _get_index_url(index, code, qt):
+    if index:
+        url = bs.HIST_INDEX_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'],
+                              code, qt[0], qt[1])
+    else:
+        url = bs.HIST_FQ_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'],
+                              code, qt[0], qt[1])
+    return url
+
 #复权日网页数据处理
 def _parase_fq_factor(code, start, end):
     symbol = _code_to_symbol(code)
@@ -113,19 +123,21 @@ def _fun_except(x):
         return x
 
 #网络连接，获取复权数据
-def _parse_fq_data(url, retry_count, pause):
+def _parse_fq_data(url, index, retry_count, pause):
     for _ in range(retry_count):
         time.sleep(pause)
         try:
             html = lxml.html.parse(url)  
-            res = html.xpath('//table[@id=\"FundHoldSharesTable\"]')
-            if bs.PY3:
-                sarr = [etree.tostring(node).decode('utf-8') for node in res]
-            else:
-                sarr = [etree.tostring(node) for node in res]
+            res = html.xpath('//table[@id=\"FundHoldSharesTable\"]')           
+            sarr = [etree.tostring(node) for node in res]
             sarr = ''.join(sarr)
-            df = pd.read_html(sarr, skiprows=[0, 1])[0]
-            df.columns = bs.HIST_FQ_COLS
+            df = pd.read_html(sarr, skiprows = [0, 1])[0]
+            if len(df) == 0:
+                return pd.DataFrame()
+            if index:
+                df.columns = bs.HIST_FQ_COLS[0:7]
+            else:
+                df.columns = bs.HIST_FQ_COLS
             if df['date'].dtypes == np.object:
                 df['date'] = df['date'].astype(np.datetime64)
             df = df.drop_duplicates('date')
@@ -133,7 +145,7 @@ def _parse_fq_data(url, retry_count, pause):
             pass
         else:
             return df
-    raise IOError("复权获取失败，请检查网络")
+    raise IOError("复权数据获取失败，请检查网络")
 
 #获取复权股票日K线数据
 def get_fq_day_data(code, retry_count=3, autype='qfq', index=False, pause=0.001):
@@ -143,15 +155,14 @@ def get_fq_day_data(code, retry_count=3, autype='qfq', index=False, pause=0.001)
     qs = sd.get_quarts(start, end)
     qt = qs[0]
     bs._write_head()
-    data = _parse_fq_data(bs.HIST_FQ_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'],
-                              code, qt[0], qt[1]), retry_count, pause)
+    data = _parse_fq_data(_get_index_url(index, code, qt), index,
+                          retry_count, pause)
     if len(qs)>1:
         for d in range(1, len(qs)):
             qt = qs[d]
             bs._write_console()
-            url = bs.HIST_FQ_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'],
-                                  code, qt[0], qt[1])
-            df = _parse_fq_data(url, retry_count, pause)
+            df = _parse_fq_data(_get_index_url(index, code, qt), index,
+                                retry_count, pause)
             data = data.append(df, ignore_index=True)
     if len(data) == 0 or len(data[(data.date>=start)&(data.date<=end)]) == 0:
         return None
@@ -167,34 +178,28 @@ def get_fq_day_data(code, retry_count=3, autype='qfq', index=False, pause=0.001)
         for label in ['open', 'high', 'close', 'low']:
             data[label] = data[label].map(bs.FORMAT)
         data = data.set_index('date')
-        data = data.sort_index(ascending=False)
+        data = data.sort_index(ascending = False)
         return data
     else:
-        for label in ['open', 'high', 'close', 'low']:
-            data[label] = data[label] / data['factor']
-        data = data.drop('factor', axis=1)
-        
         if autype == 'qfq':
+            data = data.drop('factor', axis=1)
             df = _parase_fq_factor(code, start, end)
             df = df.drop_duplicates('date')
             df = df.sort('date', ascending=False)
             frow = df.head(1)
-            df = pd.merge(data, df)
             preClose = float(get_realtime_quotes(code)['pre_close'])
-            df = df[(df.date>=start) & (df.date<=end)]
-            rate = preClose / float(frow['factor'])
-            df['close_temp'] = df['close']
-            df['close'] = rate * df['factor']
-            for label in ['open', 'high', 'low']:
-                df[label] = df[label] * (df['close'] / df['close_temp'])
-                df[label] = df[label].map(bs.FORMAT)
-            df = df.drop(['factor', 'close_temp'], axis=1)
-            df['close'] = df['close'].map(bs.FORMAT)
-            df = df.set_index('date')
-            df = df.sort_index(ascending=False)
-            df = df.astype(float)
-            return df
+            rate = float(frow['factor']) / preClose
+            data = data[(data.date >= start) & (data.date <= end)]
+            for label in ['open', 'high', 'low', 'close']:
+                data[label] = data[label] / rate
+                data[label] = data[label].map(bs.FORMAT)
+            data = data.set_index('date')
+            data = data.sort_index(ascending = False)
+            return data
         else:
+            for label in ['open', 'high', 'close', 'low']:
+                data[label] = data[label] / data['factor']
+            data = data.drop('factor', axis=1)
             data = data[(data.date>=start) & (data.date<=end)]
             for label in ['open', 'high', 'close', 'low']:
                 data[label] = data[label].map(bs.FORMAT)
