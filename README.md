@@ -1,12 +1,12 @@
-title: STOCK_TOOL  智能股票软件抓取数据模块
-date: 2015-05-11 22:28 
+#STOCK_TOOL  智能股票软件抓取数据模块
+
 
 
 获取股票基本信息
 
 运行 stock_main.py
 
-引入'stock_get.py',可使用下列函数
+引入`stock_get.py`,可使用下列函数
 
 获取全部股票代码、名称 `get_all_stock_list()`
 
