@@ -1,13 +1,15 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-test.py
-Created by Huaizheng ZHANG on 5.18.
-Copyright (c) 2015 zhzHNN. All rights reserved.
+#data = {'index':temp_index,'data1':temp_data1,'data2':temp_data2,'data3':temp_data3,'data4':temp_data4}
+"""df = pd.DataFrame(temp)
 
-"""
-import stock_get as sg
-import numpy as np
+Filename = dirname + u'股票最新价格与净资产比值'.encode('utf-8') + '.csv'
+if os.path.exists('Data/'+ dirname + '/' + Filename):
+	os.remove('Data/'+ dirname + '/' + Filename)
+	HeadData.to_csv('Data/'+ dirname + '/' + Filename, columns=['open','high','low','close','volumn'])
+else:
+	HeadData.to_csv('Data/'+ dirname + '/' + Filename, columns=['open','high','low','close','volumn'])"""
+
+
+
 #print(sg.get_fq_day_data('002024'))
 
 #print(sg.get_realtime_quotes('000581'))
@@ -23,14 +25,14 @@ for x in xrange(0,476):
 	print Volumn[x]
 np.savetxt('000009train.csv',Volumn,fmt='%s')"""
 
-Volumn = np.loadtxt('000009复权数据.csv',delimiter=',' , skiprows=1, usecols=(5,), unpack=True)
+"""Volumn = np.loadtxt('000009复权数据.csv',delimiter=',' , skiprows=1, usecols=(5,), unpack=True)
 for x in xrange(0,239):
 	Volumn[x] = Volumn[x+300]
 for x in xrange(0,234):
 	sum = (Volumn[x+1] + Volumn[x+2] + Volumn[x+3] + Volumn[x+4] + Volumn[x+5]) / 5
 	Volumn[x] = Volumn[x] / sum
 	print Volumn[x]
-np.savetxt('000009test.csv',Volumn,fmt='%s')
+np.savetxt('000009test.csv',Volumn,fmt='%s')"""
 
 
 

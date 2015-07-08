@@ -24,7 +24,7 @@ P_TYPE = {'http': 'http://'}
 
 DOMAINS = {'sina': 'sina.com.cn', 'sinahq': 'sinajs.cn',
            'ifeng': 'ifeng.com', 'sf': 'finance.sina.com.cn',
-           'vsf': 'vip.stock.finance.sina.com.cn', 
+           'vsf': 'vip.stock.finance.sina.com.cn',
            'afi': 'app.finance.ifeng.com'}
 
 HIST_FQ_COLS = ['date', 'open', 'high', 'close', 'low', 'volumn', 'amount', 'factor']
@@ -44,12 +44,14 @@ SHAREBONUS_URL = '%s%s/corp/go.php/vISSUE_ShareBonus/stockid/%s.phtml'
 SHAREBONUS_1_COLS = ['公告日期',	'送股(股)', '转增(股)', '派息(税前)(元)', '进度', '除权除息日', '股权登记日',
 					 '红股上市日', '查看详细', 'del1', 'del2']
 
-SHAREBONUS_2_COLS = ['公告日期', '配股方案(每10股配股股数)', '配股价格(元)', '基准股本(万股)', '除权日', 
+SHAREBONUS_2_COLS = ['公告日期', '配股方案(每10股配股股数)', '配股价格(元)', '基准股本(万股)', '除权日',
 					 '股权登记日', '缴款起始日', '缴款终止日', '配股上市日', '募集资金合计(元)','查看详细','del']
 
 ALL_STOCK_LIST = '%s%s/hq/list.php?type=stock_a&class=%s'
 
 STOCK_STRUCTURE_URL = '%s%s/corp/go.php/vCI_StockStructure/stockid/%s.phtml'
+
+FUNDHOLDSHARES_URL = '%s%s/corp/go.php/vFD_FinancialGuideLine/stockid/%s/displaytype/4.phtml'
 
 import sys
 PY3 = (sys.version_info[0] >= 3)

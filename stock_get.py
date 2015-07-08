@@ -33,7 +33,7 @@ def _code_to_symbol(code):
 
 #获取日k线数据
 def get_day_data(code=None, ktype='D', retry_count=3, pause=0.001):
-    
+
     symbol = _code_to_symbol(code)
     url = ''
     bs._write_head()
@@ -45,7 +45,7 @@ def get_day_data(code=None, ktype='D', retry_count=3, pause=0.001):
                                     symbol, ktype)
     else:
         raise TypeError('ktype input error.')
-    
+
     for _ in range(retry_count):
         time.sleep(pause)
         try:
@@ -67,10 +67,10 @@ def get_day_data(code=None, ktype='D', retry_count=3, pause=0.001):
             df = pd.DataFrame(js['record'], columns=cols)
             if ktype.upper() in ['D', 'W', 'M']:
                 df = df.applymap(lambda x: x.replace(u',', u''))
-            
+
             for col in cols[1:]:
                 df[col] = df[col].astype(float)
-            
+
             df = df[df.date >= '2000-01-01']
 
             end = dt.datetime.strftime(dt.datetime.today(),'%Y-%m-%d')
@@ -80,7 +80,7 @@ def get_day_data(code=None, ktype='D', retry_count=3, pause=0.001):
                 df = df.drop('turnover', axis=1)
             df = df.set_index('date')
             return df
-    
+
     raise IOError("%s网络有问题，请重新获取:%s" % (code, url))
 
 #复权日数据链接
@@ -127,8 +127,8 @@ def _parse_fq_data(url, index, retry_count, pause):
     for _ in range(retry_count):
         time.sleep(pause)
         try:
-            html = lxml.html.parse(url)  
-            res = html.xpath('//table[@id=\"FundHoldSharesTable\"]')           
+            html = lxml.html.parse(url)
+            res = html.xpath('//table[@id=\"FundHoldSharesTable\"]')
             sarr = [etree.tostring(node) for node in res]
             sarr = ''.join(sarr)
             df = pd.read_html(sarr, skiprows = [0, 1])[0]
@@ -149,7 +149,7 @@ def _parse_fq_data(url, index, retry_count, pause):
 
 #获取复权股票日K线数据
 def get_fq_day_data(code, retry_count=3, autype='qfq', index=False, pause=0.001):
-    
+
     start = sd.get_past_year()
     end = sd.today()
     qs = sd.get_quarts(start, end)
@@ -216,8 +216,8 @@ def get_realtime_quotes(symbols=None):
             symbols_list += _code_to_symbol(code) + ','
     else:
         symbols_list = _code_to_symbol(symbols)
-    bs._write_head()    
-    symbols_list = symbols_list[:-1] if len(symbols_list) > 8 else symbols_list 
+    bs._write_head()
+    symbols_list = symbols_list[:-1] if len(symbols_list) > 8 else symbols_list
     request = Request(bs.LIVE_DATA_URL%(bs.P_TYPE['http'], bs.DOMAINS['sinahq'],
                                                 _random(), symbols_list))
     text = urlopen(request,timeout=10).read()
@@ -251,7 +251,7 @@ def get_sharebonus_1_data(code, retry_count=3, pause=0.001):
         time.sleep(pause)
         try:
             url = bs.SHAREBONUS_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'], code)
-            html = lxml.html.parse(url)  
+            html = lxml.html.parse(url)
             res = html.xpath('//table[@id=\"sharebonus_1\"]')
             sarr = [etree.tostring(node) for node in res]
             sarr = ''.join(sarr)
@@ -272,7 +272,7 @@ def get_sharebonus_2_data(code, retry_count=3, pause=0.001):
         time.sleep(pause)
         try:
             url = bs.SHAREBONUS_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'], code)
-            html = lxml.html.parse(url)  
+            html = lxml.html.parse(url)
             res = html.xpath('//table[@id=\"sharebonus_2\"]')
             sarr = [etree.tostring(node) for node in res]
             sarr = ''.join(sarr)
@@ -299,7 +299,7 @@ def get_all_stock_list():
         text = n.text
         stock_name.append(text[0:-8].encode('utf-8'))
         stock_code.append(text[-7:-1])
-    
+
     #获取创业板股票
     url = bs.ALL_STOCK_LIST%(bs.P_TYPE['http'], bs.DOMAINS['afi'], 'gem')
     html = lxml.html.parse(url)
@@ -314,17 +314,17 @@ def get_all_stock_list():
     url = bs.ALL_STOCK_LIST%(bs.P_TYPE['http'], bs.DOMAINS['afi'], 'ha')
     html = lxml.html.parse(url)
     res = html.xpath('//div[@class=\"result\"]/ul')
-    nodes=res[0].xpath("li/a")  
+    nodes=res[0].xpath("li/a")
     for n in nodes:
         text = n.text
         stock_name.append(text[0:-8].encode('utf-8'))
-        stock_code.append(text[-7:-1])   
-    
+        stock_code.append(text[-7:-1])
+
     data = {'name':stock_name,'code':stock_code}
     df = pd.DataFrame(data)
     df = df.set_index('code')
     return df
-    
+
 def get_stock_structure(code, retry_count=3, pause=0.001):
     temp = []
     temp_index = []
@@ -340,11 +340,11 @@ def get_stock_structure(code, retry_count=3, pause=0.001):
         time.sleep(pause)
         try:
             html = lxml.html.parse(url)
-            bs._write_head()  
+            bs._write_head()
             while html.xpath('//table[@id=\"StockStructureNewTable%s\"]'%i):
                 bs._write_console()
                 res = html.xpath('//table[@id=\"StockStructureNewTable%s\"]'%i)
-                nodes=res[0].xpath("tbody/tr/td")  
+                nodes=res[0].xpath("tbody/tr/td")
                 for n in nodes:
                     temp.append(n.text)
                 length = len(temp)
@@ -409,4 +409,57 @@ def get_stock_structure(code, retry_count=3, pause=0.001):
     raise IOError("股本结构获取失败，请检查网络")
 
 
+def get_fundholdshares_data(code, retry_count=3, pause=0.001):
+    temp = []
+    temp_index = []
+    temp_data1 = []
+    temp_data2 = []
+    temp_data3 = []
+    temp_data4 = []
+    res = []
+    nodes = []
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            url = bs.FUNDHOLDSHARES_URL%(bs.P_TYPE['http'], bs.DOMAINS['vsf'], code)
+            html = lxml.html.parse(url)
+            res = html.xpath('//table[@id=\"BalanceSheetNewTable0\"]')
+            if len(res) == 0:
+                j = 0
+                pe = 0
+            else:
+                nodes=res[0].xpath("tbody/tr/td")
+                for n in nodes:
+                    temp.append(n.text)
+                temp.pop(5)
+                temp.pop(55)
+                temp.pop(155)
+                temp.pop(175)
+                temp.pop(225)
+                temp.pop(315)
+                temp.pop(340)
+                if temp[31] == '--':
+                    j = 0
+                else:
+                    j = float(temp[31])
+                if temp[16] == '--':
+                    pe = 0
+                else:
+                    pe = float(temp[16])
+            """length = len(temp)
+            for x in xrange(0,length):
+                if length % 5 == 0:
+                    if x % 5 == 0:
+                        temp_index.append(temp[x])
+                        temp_data1.append(temp[x+1])
+                        temp_data2.append(temp[x+2])
+                        temp_data3.append(temp[x+3])
+                        temp_data4.append(temp[x+4])
+                    data = {'index':temp_index,'data1':temp_data1,'data2':temp_data2,'data3':temp_data3,'data4':temp_data4}
+                    df = pd.DataFrame(data)"""
 
+        except _network_error_classes:
+            pass
+        else:
+            return j,pe
+    raise IOError("分红获取失败，请检查网络")

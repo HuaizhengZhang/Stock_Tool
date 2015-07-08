@@ -13,9 +13,9 @@ import os
 import datetime as dt
 
 ###judge the dir
-if os.path.isdir('Data'): 
-	pass 
-else: 
+if os.path.isdir('Data'):
+	pass
+else:
 	os.mkdir('Data')
 
 
@@ -33,12 +33,12 @@ i = 0
 length = len(StockCode)
 while i < length:
 	dirname = StockCode[i] + '(' + StockName[i] + ')'
-	
-	if os.path.isdir('Data/'+dirname): 
+
+	if os.path.isdir('Data/'+dirname):
 		pass
-	else: 
+	else:
 		os.mkdir('Data/'+dirname)
-	
+
 	print u'当前正在获取'.encode('utf-8') + dirname + u'第'.encode('utf-8')+ str(i+1) + u'个，共计'.encode('utf-8') + str(length)
 #HeadData
 	try:
@@ -50,7 +50,7 @@ while i < length:
 		os.remove('Data/'+ dirname + '/' + Filename)
 		HeadData.to_csv('Data/'+ dirname + '/' + Filename, columns=['open','high','low','close','volumn'])
 	else:
-		HeadData.to_csv('Data/'+ dirname + '/' + Filename, columns=['open','high','low','close','volumn']) 
+		HeadData.to_csv('Data/'+ dirname + '/' + Filename, columns=['open','high','low','close','volumn'])
 #KDate
 	try:
 		KData = sg.get_fq_day_data(code=StockCode[i], autype=None)
@@ -61,7 +61,7 @@ while i < length:
 		os.remove('Data/'+ dirname + '/' + Filename)
 		KData.to_csv('Data/'+ dirname + '/' + Filename, columns=['open','high','low','close','volumn'])
 	else:
-		KData.to_csv('Data/'+ dirname + '/' + Filename, columns=['open','high','low','close','volumn']) 
+		KData.to_csv('Data/'+ dirname + '/' + Filename, columns=['open','high','low','close','volumn'])
 #real_time_data
 	try:
 		Realtime_Data = sg.get_realtime_quotes(StockCode[i]).T
@@ -101,6 +101,5 @@ while i < length:
 	else:
 		Stock_Structure.to_csv('Data/'+ dirname + '/' + Filename, header=False, encoding='utf8')
 
-	
-	i = i+1
 
+	i = i+1
